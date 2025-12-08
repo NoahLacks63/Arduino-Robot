@@ -16,9 +16,12 @@ WiFiUDP Udp;
 
 void setup() {
     Serial.begin(115200);
-    while (!Serial){
+    while (!Serial) {
         ; // wait for serial port to connect. Needed for native USB port only
     }
+
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, LOW);
 
     Serial.println("Starting Access Point…");
 
@@ -30,6 +33,8 @@ void setup() {
             ;
     }
 
+    digitalWrite(LED_BUILTIN, HIGH);
+
     Serial.println("Access Point active");
     printAPStatus();
 
@@ -39,23 +44,28 @@ void setup() {
     Serial.println(LOCAL_PORT);
 }
 
-void loop()
-{
+void loop() {
     int packetSize = Udp.parsePacket();
-    if (packetSize)
-    {
+    if (packetSize) {
         Serial.print("Received packet from ");
         Serial.print(Udp.remoteIP());
         Serial.print(":");
         Serial.println(Udp.remotePort());
 
-        char incoming[256];
+        byte incoming[256];
         int len = Udp.read(incoming, 255);
         if (len > 0)
             incoming[len] = '\0';
 
         Serial.print("Message: ");
-        Serial.println(incoming);
+        for (int i = 0; i < len; i++) {
+            uint8_t b = incoming[i];
+            for (int bit = 7; bit >= 0; bit--) {
+                Serial.print((b >> bit) & 1);
+            }
+            Serial.print(" ");
+        }
+        Serial.println();
     }
 }
 
@@ -70,8 +80,7 @@ void printAPStatus() {
     Serial.print("MAC: ");
     byte mac[6];
     WiFi.macAddress(mac);
-    for (int i = 0; i < 6; i++)
-    {
+    for (int i = 0; i < 6; i++) {
         if (mac[i] < 16)
             Serial.print("0");
         Serial.print(mac[i], HEX);
