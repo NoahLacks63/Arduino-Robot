@@ -12,7 +12,7 @@ const char SSID[] = SECRET_SSID;
 const char PASS[] = SECRET_PASS;
 const unsigned int LOCAL_PORT = 2390;
 
-WiFiUDP Udp;
+WiFiUDP udp;
 
 void setup() {
     Serial.begin(115200);
@@ -39,23 +39,21 @@ void setup() {
     printAPStatus();
 
     // Start UDP
-    Udp.begin(LOCAL_PORT);
+    udp.begin(LOCAL_PORT);
     Serial.print("Listening for UDP on port ");
     Serial.println(LOCAL_PORT);
 }
 
 void loop() {
-    int packetSize = Udp.parsePacket();
+    int packetSize = udp.parsePacket();
     if (packetSize) {
         Serial.print("Received packet from ");
-        Serial.print(Udp.remoteIP());
+        Serial.print(udp.remoteIP());
         Serial.print(":");
-        Serial.println(Udp.remotePort());
+        Serial.println(udp.remotePort());
 
         byte incoming[256];
-        int len = Udp.read(incoming, 255);
-        if (len > 0)
-            incoming[len] = '\0';
+        int len = udp.read(incoming, 255);
 
         Serial.print("Message: ");
         for (int i = 0; i < len; i++) {
